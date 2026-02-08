@@ -3,7 +3,6 @@ import { supabase } from './supabaseClient'
 import KanbanBoard from './components/KanbanBoard'
 import { translations } from './translations'
 
-// --- GLOBAL: FLYTANDE SPRÅK-KNAPP ---
 const LangToggle = ({ lang, setLang }: { lang: 'sv' | 'en', setLang: (l: 'sv'|'en') => void }) => (
   <button 
     onClick={() => setLang(lang === 'sv' ? 'en' : 'sv')}
@@ -14,7 +13,6 @@ const LangToggle = ({ lang, setLang }: { lang: 'sv' | 'en', setLang: (l: 'sv'|'e
   </button>
 )
 
-// --- 1. PUBLIK ANSÖKNINGSSIDA ---
 function ApplyPage({ jobId, lang }: { jobId: string, lang: 'sv' | 'en' }) {
   const t = translations[lang]
   const [job, setJob] = useState<any>(null)
@@ -149,7 +147,6 @@ function ApplyPage({ jobId, lang }: { jobId: string, lang: 'sv' | 'en' }) {
   )
 }
 
-// --- 2. HUVUDAPPEN ---
 export default function App() {
   const [session, setSession] = useState<any>(null)
   const [role, setRole] = useState('customer')
@@ -200,7 +197,6 @@ export default function App() {
   )
 }
 
-// --- 3. INLOGGNING ---
 function AuthScreen({ lang }: { lang: 'sv' | 'en' }) {
   const t = translations[lang]
   const [email, setEmail] = useState(''); const [password, setPassword] = useState('')
@@ -242,7 +238,6 @@ function AuthScreen({ lang }: { lang: 'sv' | 'en' }) {
   )
 }
 
-// --- 4. DASHBOARD ---
 function Dashboard({ role, session, lang }: { role: string, session: any, lang: 'sv' | 'en' }) {
   const t = translations[lang]
   const [view, setView] = useState<'dashboard' | 'job' | 'customers'>('dashboard')
@@ -290,7 +285,6 @@ function Dashboard({ role, session, lang }: { role: string, session: any, lang: 
     let jobsQ = supabase.from('jobs').select('id')
     if (role !== 'admin') jobsQ = jobsQ.eq('user_id', session.user.id)
     const { data: userJobs } = await jobsQ
-    // HÄR VAR FELET: Jag har lagt till "as any[]" för att tvinga TypeScript att förstå att det är en lista
     const jobIds = (userJobs as any[])?.map(j => j.id) || []
     
     if (jobIds.length > 0) {
@@ -436,10 +430,7 @@ function Dashboard({ role, session, lang }: { role: string, session: any, lang: 
                    {job.salary_range && <span className="text-[10px] font-bold uppercase tracking-wide bg-green-50 text-green-600 px-3 py-1.5 rounded-lg">💰 {job.salary_range}</span>}
                    {job.start_date && <span className="text-[10px] font-bold uppercase tracking-wide bg-purple-50 text-purple-600 px-3 py-1.5 rounded-lg">📅 {job.start_date}</span>}
                 </div>
-                {/* HÄR VISAS FÖRHANDSGRANSKNING AV JOBB-TEXTEN (STRIPPAD HTML FÖR ATT SLIPPA TAGGAR I KORTET) */}
-                <p className="text-slate-400 font-medium line-clamp-3 mb-8 flex-1 leading-relaxed">
-                    {job.description.replace(/<[^>]*>?/gm, '')}
-                </p>
+                <p className="text-slate-400 font-medium line-clamp-3 mb-8 flex-1 leading-relaxed">{job.description}</p>
                 <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-50">
                   <div className="flex gap-2">
                       <button onClick={(e) => { e.stopPropagation(); toggleJobStatus(job) }} className={`text-[10px] font-bold uppercase px-3 py-1.5 rounded-lg border transition ${job.status === 'active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-200'}`}>{job.status === 'active' ? t.statusActive : t.statusClosed}</button>
@@ -466,19 +457,8 @@ function Dashboard({ role, session, lang }: { role: string, session: any, lang: 
                        <div><label className="block text-xs font-black text-slate-400 uppercase tracking-wide mb-1">{t.salaryLabel}</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-indigo-500 outline-none font-semibold transition-all" value={newSalary} onChange={e => setNewSalary(e.target.value)} placeholder={t.phSalary} /></div>
                        <div><label className="block text-xs font-black text-slate-400 uppercase tracking-wide mb-1">{t.startLabel}</label><input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-indigo-500 outline-none font-semibold transition-all" value={newStartDate} onChange={e => setNewStartDate(e.target.value)} /></div>
                     </div>
-                    
-                    {/* RICH TEXT EDITOR: BESKRIVNING */}
-                    <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wide mb-1">{t.jobDescLabel}</label>
-                        <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 font-bold h-32 resize-none" value={newJobDesc} onChange={e => setNewJobDesc(e.target.value)} placeholder={t.phDesc} />
-                    </div>
-
-                    {/* RICH TEXT EDITOR: KRAV */}
-                    <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase tracking-wide mb-1">{t.jobReqLabel}</label>
-                        <textarea className="w-full p-4 bg-amber-50/50 border border-amber-100 rounded-2xl focus:bg-white focus:border-amber-300 outline-none font-semibold transition-all h-24 resize-none" value={newRequirements} onChange={e => setNewRequirements(e.target.value)} placeholder={t.phReq} />
-                    </div>
-
+                    <div><label className="block text-xs font-black text-slate-400 uppercase tracking-wide mb-1">{t.jobDescLabel}</label><textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 font-bold h-32 resize-none" value={newJobDesc} onChange={e => setNewJobDesc(e.target.value)} placeholder={t.phDesc} /></div>
+                    <div><label className="block text-xs font-black text-slate-500 uppercase tracking-wide mb-1">{t.jobReqLabel}</label><textarea className="w-full p-4 bg-amber-50/50 border border-amber-100 rounded-2xl focus:bg-white focus:border-amber-300 outline-none font-semibold transition-all h-24 resize-none" value={newRequirements} onChange={e => setNewRequirements(e.target.value)} placeholder={t.phReq} /></div>
                   </form>
                 </div>
                 <div className="p-8 border-t border-slate-50 bg-slate-50/50 flex gap-4"><button onClick={() => setShowCreateModal(false)} className="flex-1 p-4 text-slate-400 font-black uppercase text-xs tracking-widest hover:text-slate-900 transition-colors">{t.cancel}</button><button form="createJobForm" disabled={isCreating} className="flex-[2] bg-indigo-600 text-white p-4 rounded-2xl font-black text-lg hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100">{isCreating ? t.creating : t.save}</button></div>
